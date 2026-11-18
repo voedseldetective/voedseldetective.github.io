@@ -39,6 +39,15 @@ class BuildTests(unittest.TestCase):
         self.assertNotIn("_raw_codes", rec["products"][0])
         self.assertNotIn("keys", rec["products"][0])
 
+    def test_products_sold_in_nl_come_first(self):
+        prods = [{"barcode": str(i), "name": n, "brand": b, "chain": None, "country": c, "keys": ["NL-Z1"],
+                  "evidence": "community", "source_url": "u"}
+                 for i, (n, b, c) in enumerate([("a", "Aaa", "france"), ("b", "Bbb", "belgium"),
+                                                ("c", "Ccc", "netherlands"), ("d", "Ddd", None)])]
+        out = merge([], prods, {}, [], {}, generated="2026-11-18")
+        self.assertEqual([p["country"] for p in out["codes"]["NL-Z1"]["products"]],
+                         ["netherlands", "belgium", "france", None])
+
     def test_private_pack_station(self):
         rec = self.out["codes"]["EGGPACK-NL80026"]
         self.assertEqual(rec["kind"], "egg_pack")

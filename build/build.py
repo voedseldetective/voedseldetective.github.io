@@ -14,6 +14,8 @@ from build.codes import parse_code
 
 ROOT = Path(__file__).resolve().parent.parent
 EST_FIELDS = ("name", "trade", "city", "private", "type", "evidence", "source_id", "source_url", "date")
+# Products sold in the Netherlands first, then Belgium, then the rest, unknown last.
+COUNTRY_RANK = {"netherlands": 0, "belgium": 1}
 PRODUCT_FIELDS = ("barcode", "name", "brand", "chain", "country", "evidence", "source_url")
 
 
@@ -48,6 +50,7 @@ def merge(establishments, products, groups, cases, sources, generated=None) -> d
             record(key)["products"].append(item)
     for rec in codes.values():
         rec["products"].sort(key=lambda p: (p["chain"] is None, p["chain"] or "",
+                                            COUNTRY_RANK.get(p["country"], 2 if p["country"] else 3),
                                             (p["brand"] or "").lower(), (p["name"] or "").lower()))
     return {"generated": generated or dt.date.today().isoformat(), "sources": sources,
             "codes": dict(sorted(codes.items())), "cases": cases}
