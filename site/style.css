@@ -21,7 +21,7 @@ a:focus-visible, button:focus-visible, input:focus-visible { outline: 3px solid 
 .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
 .top { display: flex; justify-content: space-between; align-items: center; padding-top: 1rem; padding-bottom: 1rem; }
-.wordmark { font-weight: 800; font-size: 1.25rem; letter-spacing: -0.01em; color: var(--ink); text-decoration: none; }
+.wordmark { display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 800; font-size: 1.25rem; letter-spacing: -0.01em; color: var(--ink); text-decoration: none; }
 .langs { display: flex; gap: 0.25rem; }
 .langs a { padding: 0.35rem 0.6rem; border-radius: 0.4rem; text-decoration: none; color: var(--muted); font-weight: 600; font-size: 0.9rem; }
 .langs a[aria-current="true"] { background: var(--ink); color: #fff; }

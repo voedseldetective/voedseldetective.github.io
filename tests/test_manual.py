@@ -53,3 +53,12 @@ class ManualTests(unittest.TestCase):
         groups = load_groups(ROOT / "elle" / "gruplar.csv")
         self.assertIn("DMK Deutsches Milchkontor GmbH", groups)
         self.assertEqual(load_cases(ROOT / "elle" / "vakalar.csv"), [])
+
+    def test_gleif_groups(self):
+        groups = load_groups(ROOT / "elle" / "gruplar.csv")
+        g = groups["Storteboom Food Group B.V."]
+        self.assertEqual(g["group"], "Boparan Private Office Limited")
+        self.assertEqual(g["evidence"], "official")
+        self.assertTrue(g["source_url"].startswith("https://search.gleif.org/#/record/"))
+        self.assertEqual(groups["Nestlé Nederland B.V."]["group"], "Société des Produits Nestlé S.A. → Nestlé S.A.")
+        self.assertNotIn("DOC Kaas B.V.", groups)  # lapsed LEI, not added until verified
