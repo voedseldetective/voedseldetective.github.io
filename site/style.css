@@ -84,3 +84,17 @@ a:focus-visible, button:focus-visible, input:focus-visible { outline: 3px solid 
   .stamp input { font-size: 1.1rem; }
   .stamp button { padding: 0.6rem 0.8rem; }
 }
+
+.examples { margin-top: -0.5rem; margin-bottom: 1.5rem; }
+.examples p { margin: 0 0 0.5rem; color: var(--muted); }
+.chips { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.example {
+  border: 2px solid var(--stamp); border-radius: 50% / 50%; padding: 0.35rem 0.9rem;
+  font-weight: 700; letter-spacing: 0.05em; text-decoration: none; background: var(--card);
+}
+.example:hover { background: #efeaf8; }
+details { margin-top: 0.25rem; }
+summary { cursor: pointer; color: var(--stamp); font-weight: 650; padding: 0.4rem 0; }
+.badges { list-style: none; padding: 0; }
+.badges li { padding: 0.3rem 0; }
+.step > .src { margin-bottom: 0.25rem; }

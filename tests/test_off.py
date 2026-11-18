@@ -14,6 +14,11 @@ class OffTests(unittest.TestCase):
         self.assertIsNone(map_chain(["Zott"]))
         self.assertIsNone(map_chain([]))
 
+    def test_store_brand_spelling_is_canonical(self):
+        [p] = products_from_hits([{"code": "9", "product_name": "x", "brands": ["milbona"],
+                                   "emb_codes": ["NL Z0507 EG"], "countries_tags": []}])
+        self.assertEqual(p["brand"], "Milbona")
+
     def test_products_from_hits(self):
         products = products_from_hits(PAGE["hits"])
         self.assertEqual([p["barcode"] for p in products], ["20968090", "8719587000001"])
@@ -41,6 +46,8 @@ class OffTests(unittest.TestCase):
 
 class RekeyTests(unittest.TestCase):
     def test_rekey_recomputes_stale_keys(self):
-        stale = [{"barcode": "1", "keys": ["BE-L352EG"], "_raw_codes": ["BE L352 EG/EC"]},
+        stale = [{"barcode": "1", "brand": "milbona", "keys": ["BE-L352EG"], "_raw_codes": ["BE L352 EG/EC"]},
                  {"barcode": "2", "keys": ["X"], "_raw_codes": ["FSC-C1"]}]
-        self.assertEqual([p["keys"] for p in rekey(stale)], [["BE-L352"]])
+        fresh = rekey(stale)
+        self.assertEqual([p["keys"] for p in fresh], [["BE-L352"]])
+        self.assertEqual(fresh[0]["brand"], "Milbona")

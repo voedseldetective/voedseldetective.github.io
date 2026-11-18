@@ -102,3 +102,68 @@ test("group step shows its source date", () => {
   assert.ok(html.includes("DMK Group"));
   assert.ok(html.includes("2026-11-17"));
 });
+
+// ---- design pass ----
+const many = (n) => Array.from({ length: n }, (_, i) => prod(`P${i}`, `Brand${i}`, null));
+
+test("home offers clickable example codes", () => {
+  const html = renderHome("nl", []);
+  assert.ok(html.includes(STRINGS.nl.try_examples));
+  assert.ok(html.includes('href="#/nl/kod/NL%20Z0507%20EG"'));
+  assert.ok(html.includes("MSC-C-50572"));
+});
+
+test("long other-brands list collapses after 5, chains stay open", () => {
+  const d = { codes: { "NL-Z507": { ...data.codes["NL-Z507"], products: [prod("L", "Milbona", "Lidl"), ...many(12)] } } };
+  const { parsed, matches } = lookup(d, "NL Z0507 EG");
+  const html = renderDossier("tr", parsed, matches, d);
+  assert.ok(html.includes("<details"));
+  assert.ok(html.includes("Tümünü göster (12)"));
+  assert.ok(html.indexOf("P4") < html.indexOf("<details"));
+  assert.ok(html.indexOf("P5") > html.indexOf("<details"));
+  assert.ok(html.indexOf("Milbona") < html.indexOf("<details"));
+});
+
+test("community badge shown once per product section", () => {
+  const { parsed, matches } = lookup(data, "NL Z0507 EG");
+  const html = renderDossier("en", parsed, matches, data);
+  assert.equal(html.split(STRINGS.en.badge_community).length - 1, 1);
+  assert.ok(html.includes("Open Food Facts"));
+});
+
+test("product country is translated and unknown ones hidden", () => {
+  const d = { codes: { "NL-Z507": { ...data.codes["NL-Z507"],
+    products: [{ ...prod("A", "Milbona", "Lidl"), country: "germany" }, { ...prod("B", "X", null), country: "afghanistan" }] } } };
+  const { parsed, matches } = lookup(d, "NL Z0507 EG");
+  const html = renderDossier("tr", parsed, matches, d);
+  assert.ok(html.includes("(Almanya)"));
+  assert.ok(!html.includes("germany"));
+  assert.ok(!html.includes("afghanistan"));
+});
+
+test("step numbers stay sequential without an establishment", () => {
+  const d = { codes: { "NL-Z999": { kind: "oval", country: "NL", region: null, group: null, establishments: [],
+    products: [prod("A", "Milbona", "Lidl")] } } };
+  const { parsed, matches } = lookup(d, "NL Z0999 EG");
+  const html = renderDossier("nl", parsed, matches, d);
+  assert.ok(html.includes('<span class="num">2</span>'));
+  assert.ok(!html.includes('<span class="num">3</span>'));
+});
+
+test("ambiguous dossiers label both codes the same way", () => {
+  const { parsed, matches } = lookup(data, "NL 1005");
+  const html = renderDossier("nl", parsed, matches, data);
+  assert.equal(html.split('<p class="code">NL 1005</p>').length - 1, 2);
+});
+
+test("about page explains every badge and keeps sources safe", async () => {
+  const { renderAbout } = await import("../../site/js/render.js");
+  const html = renderAbout("tr", { cokz_zuivel: { url: "https://cokz.nl/x", date: "2026-11-04" }, bad: { url: "javascript:alert(1)" } }, "info@example.org");
+  for (const k of ["badge_official_desc", "badge_company_desc", "badge_community_desc", "badge_verified_desc", "badges_title", "disclaimer"])
+    assert.ok(html.includes(STRINGS.tr[k]), k);
+  assert.ok(html.includes("2026-11-04"));
+  assert.ok(!html.includes("javascript:"));
+  assert.ok(html.includes("info@example.org"));
+  assert.ok(html.includes("COKZ – erkende zuivelbedrijven"));
+  assert.ok(!html.includes(">cokz_zuivel<"));
+});

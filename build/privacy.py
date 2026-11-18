@@ -31,8 +31,13 @@ def is_legal_entity(name: str) -> bool:
     return bool(LEGAL_CI.search(name) or LEGAL_CS.search(name))
 
 
+def _city(city: str) -> str | None:
+    city = (city or "").strip().title()
+    return re.sub(r"^'([ST])\b", lambda m: "'" + m.group(1).lower(), city) or None  # 's-Hertogenbosch, 't Zandt
+
+
 def public_establishment(name: str, trade: str, city: str) -> dict:
-    city = (city or "").strip().title() or None
+    city = _city(city)
     if is_legal_entity(name):
         return {"name": name.strip(), "trade": (trade or "").strip() or None, "city": city, "private": False}
     return {"name": None, "trade": None, "city": city, "private": True}

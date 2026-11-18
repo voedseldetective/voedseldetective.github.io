@@ -2,7 +2,7 @@
 import { parseCode } from "./codes.js";
 import { t, pickLang, LANGS } from "./i18n.js";
 import { parseHash as parseRouteHash } from "./route.js";
-import { lookup, renderDossier, renderNotFound, renderEggShell, renderHome, escapeHtml } from "./render.js";
+import { lookup, renderDossier, renderNotFound, renderEggShell, renderHome, renderAbout, escapeHtml } from "./render.js";
 
 const CONTACT_EMAIL = "REPLACE_CONTACT_EMAIL";
 const $ = (id) => document.getElementById(id);
@@ -67,16 +67,8 @@ function renderCode(raw) {
   document.title = `${raw} – Voedseldetective`;
 }
 
-function renderAbout() {
-  const src = Object.entries(data?.sources || {})
-    .filter(([, s]) => s.url)
-    .map(([id, s]) => `<li><a href="${escapeHtml(s.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(id)}</a>`
-      + `${s.date ? ` (${escapeHtml(t(lang, "as_of"))} ${escapeHtml(s.date)})` : ""}${s.license ? ` – ${escapeHtml(s.license)}` : ""}</li>`)
-    .join("");
-  $("view").innerHTML = `<article class="dossier"><h2>${escapeHtml(t(lang, "about_title"))}</h2>
-<p>${escapeHtml(t(lang, "about_body"))}</p><p class="disclaimer">${escapeHtml(t(lang, "disclaimer"))}</p>
-<h3>${escapeHtml(t(lang, "sources_title"))}</h3><ul>${src}</ul><p>${escapeHtml(t(lang, "license_off"))}</p>
-<p>${escapeHtml(t(lang, "takedown", { email: CONTACT_EMAIL }))}</p></article>`;
+function renderAboutPage() {
+  $("view").innerHTML = renderAbout(lang, data?.sources, CONTACT_EMAIL);
   document.title = `${t(lang, "about_title")} – Voedseldetective`;
 }
 
@@ -91,7 +83,7 @@ function route() {
   storeLang(lang);
   setChrome();
   if (h.page === "kod" && h.arg) renderCode(h.arg);
-  else if (h.page === "over") renderAbout();
+  else if (h.page === "over") renderAboutPage();
   else {
     $("q").value = "";
     $("view").innerHTML = renderHome(lang, data?.cases || []);

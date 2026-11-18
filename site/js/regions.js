@@ -23,7 +23,34 @@ export const COUNTRIES = {
   LT: { nl: "Litouwen", en: "Lithuania", tr: "Litvanya" },
   CH: { nl: "Zwitserland", en: "Switzerland", tr: "İsviçre" },
   NO: { nl: "Noorwegen", en: "Norway", tr: "Norveç" },
+  BG: { nl: "Bulgarije", en: "Bulgaria", tr: "Bulgaristan" },
+  CY: { nl: "Cyprus", en: "Cyprus", tr: "Kıbrıs" },
+  EE: { nl: "Estland", en: "Estonia", tr: "Estonya" },
+  HR: { nl: "Kroatië", en: "Croatia", tr: "Hırvatistan" },
+  LV: { nl: "Letland", en: "Latvia", tr: "Letonya" },
+  MT: { nl: "Malta", en: "Malta", tr: "Malta" },
+  RO: { nl: "Roemenië", en: "Romania", tr: "Romanya" },
+  SI: { nl: "Slovenië", en: "Slovenia", tr: "Slovenya" },
+  SK: { nl: "Slowakije", en: "Slovakia", tr: "Slovakya" },
+  IS: { nl: "IJsland", en: "Iceland", tr: "İzlanda" },
+  US: { nl: "Verenigde Staten", en: "United States", tr: "ABD" },
 };
+
+// Open Food Facts country slugs (sale country of a product) to the codes above.
+// Unknown slugs are not shown: they are often data-entry noise.
+const OFF_SLUGS = {
+  netherlands: "NL", germany: "DE", deutschland: "DE", belgium: "BE", belgie: "BE", france: "FR",
+  italy: "IT", spain: "ES", denmark: "DK", austria: "AT", poland: "PL", ireland: "IE",
+  "united-kingdom": "GB", luxembourg: "LU", portugal: "PT", greece: "GR", sweden: "SE",
+  finland: "FI", "czech-republic": "CZ", hungary: "HU", lithuania: "LT", switzerland: "CH",
+  norway: "NO", bulgaria: "BG", cyprus: "CY", estonia: "EE", croatia: "HR", latvia: "LV",
+  malta: "MT", romania: "RO", slovenia: "SI", slovakia: "SK", iceland: "IS", "united-states": "US",
+};
+
+export function offCountryName(slug, lang) {
+  const code = OFF_SLUGS[slug];
+  return code ? countryName(code, lang) : null;
+}
 
 // Prefixes in German oval codes. EV is not a state.
 export const DE_STATES = {

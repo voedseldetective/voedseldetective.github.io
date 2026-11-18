@@ -28,6 +28,10 @@ class PrivacyTests(unittest.TestCase):
         self.assertTrue(e["private"])
         self.assertEqual(e["city"], "St. Oedenrode")
 
+    def test_city_title_case_keeps_dutch_s(self):
+        self.assertEqual(public_establishment("X B.V.", "", "'S-HERTOGENBOSCH")["city"], "'s-Hertogenbosch")
+        self.assertEqual(public_establishment("X B.V.", "", "'T ZANDT")["city"], "'t Zandt")
+
     def test_public_establishment_keeps_company(self):
         e = public_establishment("Th. Vergeer en Zonen B.V.", "Vergeer Holland", "REEUWIJK")
         self.assertEqual(e, {"name": "Th. Vergeer en Zonen B.V.", "trade": "Vergeer Holland",

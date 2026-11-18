@@ -57,3 +57,11 @@ test("regions", () => {
   assert.equal(COUNTRIES.NL.tr, "Hollanda");
   assert.ok(DE_STATES.EV.en.includes("EU"));
 });
+
+test("design pass strings and countries", () => {
+  for (const lang of ["nl", "en", "tr"]) {
+    for (const k of ["try_examples", "show_all", "badge_official_desc", "badge_company_desc", "badge_community_desc", "badge_verified_desc"])
+      assert.ok(STRINGS[lang][k], `${lang}.${k}`);
+  }
+  for (const c of ["BG", "CY", "EE", "HR", "LV", "MT", "RO", "SI", "SK", "IS", "SE", "FI", "CZ"]) assert.ok(COUNTRIES[c]?.tr, c);
+});

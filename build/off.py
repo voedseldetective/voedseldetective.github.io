@@ -18,6 +18,7 @@ def _norm(s: str) -> str:
 
 
 _BRAND_TO_CHAIN = {_norm(b): chain for chain, brands in CHAINS.items() for b in brands}
+_CANONICAL = {_norm(b): b for brands in CHAINS.values() for b in brands}
 
 
 def map_chain(brands: list[str]) -> str | None:
@@ -50,7 +51,7 @@ def products_from_hits(hits: list[dict]) -> list[dict]:
         out.append({
             "barcode": h["code"],
             "name": (h.get("product_name") or "").strip(),
-            "brand": brands[0] if brands else None,
+            "brand": _CANONICAL.get(_norm(brands[0]), brands[0].strip()) if brands else None,
             "chain": map_chain(brands),
             "country": countries[0].split(":", 1)[-1] if countries else None,
             "keys": keys,
@@ -111,4 +112,6 @@ def rekey(products: list[dict]) -> list[dict]:
     for p in products:
         if p.get("_raw_codes"):
             p["keys"] = _keys(p["_raw_codes"])
+        if p.get("brand"):
+            p["brand"] = _CANONICAL.get(_norm(p["brand"]), p["brand"])
     return [p for p in products if p["keys"]]
