@@ -9,9 +9,18 @@ const $ = (id) => document.getElementById(id);
 let data = null;
 let lang = "nl";
 
-function track(event) {
-  try { window.goatcounter?.count?.({ path: event, event: true }); } catch { /* analytics never breaks the page */ }
+// count.js loads async, so early calls are queued and flushed once it has loaded.
+// "visit" is sent as a pageview (keeps the referrer: Instagram, TikTok…); the rest are events.
+const pending = [];
+function send(event) {
+  const hit = event === "visit" ? { path: "/" } : { path: event, event: true };
+  try { window.goatcounter.count(hit); } catch { /* analytics never breaks the page */ }
 }
+function track(event) {
+  if (window.goatcounter?.count) send(event);
+  else pending.push(event);
+}
+document.getElementById("gc")?.addEventListener("load", () => pending.splice(0).forEach(send));
 
 function storedLang() {
   try { return localStorage.getItem("lang"); } catch { return null; }
