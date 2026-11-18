@@ -1,0 +1,86 @@
+:root {
+  --ink: #18223a;
+  --muted: #5a6478;
+  --paper: #f5f6f9;
+  --card: #ffffff;
+  --stamp: #4b2e83;
+  --line: #d9dce5;
+  --official: #1f6e47;
+  --company: #23519c;
+  --community: #8a5a00;
+  --verified: #4b2e83;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: var(--ink);
+  background: var(--paper);
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--paper); line-height: 1.5; font-size: 1.0625rem; }
+main, .top, .foot { max-width: 40rem; margin: 0 auto; padding: 0 16px; }
+a { color: var(--stamp); }
+a:focus-visible, button:focus-visible, input:focus-visible { outline: 3px solid var(--stamp); outline-offset: 2px; }
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+.top { display: flex; justify-content: space-between; align-items: center; padding-top: 1rem; padding-bottom: 1rem; }
+.wordmark { font-weight: 800; font-size: 1.25rem; letter-spacing: -0.01em; color: var(--ink); text-decoration: none; }
+.langs { display: flex; gap: 0.25rem; }
+.langs a { padding: 0.35rem 0.6rem; border-radius: 0.4rem; text-decoration: none; color: var(--muted); font-weight: 600; font-size: 0.9rem; }
+.langs a[aria-current="true"] { background: var(--ink); color: #fff; }
+
+.tagline { font-size: clamp(1.5rem, 5vw, 2.1rem); font-weight: 750; line-height: 1.2; margin: 1.5rem 0 1.25rem; max-width: 30ch; }
+
+/* The search field is drawn as the oval approval mark found on the pack. */
+.stamp {
+  display: flex; align-items: center; gap: 0.5rem;
+  border: 3px solid var(--stamp); border-radius: 50% / 50%;
+  padding: 0.9rem 0.9rem 0.9rem 2rem; background: var(--card);
+  max-width: 30rem;
+}
+.stamp input {
+  flex: 1; min-width: 0; border: 0; background: transparent; color: var(--stamp);
+  font: 700 1.35rem/1.2 system-ui, sans-serif; letter-spacing: 0.08em; text-transform: uppercase;
+}
+.stamp input::placeholder { color: #a89cc4; letter-spacing: 0.04em; }
+.stamp input:focus-visible { outline: none; }
+.stamp:focus-within { box-shadow: 0 0 0 3px #d9cff0; }
+.stamp button {
+  border: 0; border-radius: 999px; background: var(--stamp); color: #fff;
+  font-weight: 700; font-size: 1rem; padding: 0.65rem 1.1rem; cursor: pointer;
+}
+
+#view { margin: 2rem 0 3rem; }
+.help, .note { color: var(--muted); }
+.dossier { background: var(--card); border: 1px solid var(--line); border-radius: 0.75rem; padding: 1.25rem; margin-bottom: 1.25rem; }
+.step { padding-left: 2.25rem; position: relative; margin-bottom: 1.25rem; }
+.step h3 { font-size: 1rem; margin: 0 0 0.35rem; color: var(--muted); font-weight: 650; }
+.step .num {
+  position: absolute; left: 0; top: -0.1rem; width: 1.6rem; height: 1.6rem; border-radius: 50%;
+  border: 2px solid var(--stamp); color: var(--stamp); display: grid; place-items: center;
+  font-size: 0.85rem; font-weight: 800;
+}
+.step p { margin: 0.15rem 0; }
+.code { font-weight: 800; font-size: 1.3rem; color: var(--stamp); letter-spacing: 0.06em; }
+.est, .products { list-style: none; padding: 0; margin: 0; }
+.est li, .products li { padding: 0.5rem 0; border-top: 1px solid var(--line); overflow-wrap: anywhere; }
+.est li:first-child, .products li:first-child { border-top: 0; }
+.step h4 { margin: 0.75rem 0 0.15rem; font-size: 0.95rem; }
+.trade, .muted, .src { color: var(--muted); }
+.src { font-size: 0.9rem; display: block; }
+
+.badge { display: inline-block; font-size: 0.78rem; font-weight: 700; padding: 0.05rem 0.5rem; border-radius: 0.3rem; border: 1.5px solid; margin: 0.2rem 0.25rem 0.2rem 0; }
+.badge-official { color: var(--official); }
+.badge-company { color: var(--company); }
+.badge-community { color: var(--community); }
+.badge-verified { color: var(--verified); background: #efeaf8; }
+
+.disclaimer { font-size: 0.9rem; color: var(--muted); border-left: 3px solid var(--stamp); padding-left: 0.75rem; margin: 0.75rem 0 0; }
+.actions { display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center; margin: 1rem 0; }
+.actions button { border: 2px solid var(--stamp); background: transparent; color: var(--stamp); border-radius: 999px; padding: 0.45rem 1rem; font-weight: 700; cursor: pointer; }
+.cases ul { list-style: none; padding: 0; }
+.cases li { border-top: 1px solid var(--line); padding: 0.75rem 0; }
+.foot { color: var(--muted); font-size: 0.9rem; padding-bottom: 2rem; display: flex; gap: 1rem; flex-wrap: wrap; }
+
+@media (max-width: 400px) {
+  .stamp { padding-left: 1.25rem; }
+  .stamp input { font-size: 1.1rem; }
+  .stamp button { padding: 0.6rem 0.8rem; }
+}
