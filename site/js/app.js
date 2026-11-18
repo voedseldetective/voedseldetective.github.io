@@ -4,7 +4,7 @@ import { t, pickLang, LANGS } from "./i18n.js";
 import { parseHash as parseRouteHash } from "./route.js";
 import { lookup, renderDossier, renderNotFound, renderEggShell, renderHome, renderAbout, escapeHtml } from "./render.js";
 
-const CONTACT_EMAIL = "REPLACE_CONTACT_EMAIL";
+const CONTACT_EMAIL = "voedseldetective@gmail.com";
 const $ = (id) => document.getElementById(id);
 let data = null;
 let lang = "nl";
