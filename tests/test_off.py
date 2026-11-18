@@ -2,7 +2,7 @@ import json
 import unittest
 from pathlib import Path
 
-from build.off import fetch_products, map_chain, products_from_hits
+from build.off import fetch_products, map_chain, products_from_hits, rekey
 
 PAGE = json.loads((Path(__file__).parent / "fixtures" / "off_page.json").read_text(encoding="utf-8"))
 
@@ -37,3 +37,10 @@ class OffTests(unittest.TestCase):
         self.assertIn('brands:"Milbona" AND emb_codes:* AND countries_tags:"en:netherlands"', queries)
         self.assertIn('emb_codes:"NL Z0507 EG"', queries)
         self.assertIn('emb_codes:"NL Z 0507 EG"', queries)
+
+
+class RekeyTests(unittest.TestCase):
+    def test_rekey_recomputes_stale_keys(self):
+        stale = [{"barcode": "1", "keys": ["BE-L352EG"], "_raw_codes": ["BE L352 EG/EC"]},
+                 {"barcode": "2", "keys": ["X"], "_raw_codes": ["FSC-C1"]}]
+        self.assertEqual([p["keys"] for p in rekey(stale)], [["BE-L352"]])

@@ -96,7 +96,7 @@ def main(argv=None):
     off_path = cache / "off.json"
     if args.offline:
         cached = json.loads(off_path.read_text(encoding="utf-8"))
-        products = cached.get("products") or off.products_from_hits(cached.get("hits", []))
+        products = off.rekey(cached.get("products") or off.products_from_hits(cached.get("hits", [])))
     else:
         brands = [b for bs in off.CHAINS.values() for b in bs]
         products = off.fetch_products(brands)

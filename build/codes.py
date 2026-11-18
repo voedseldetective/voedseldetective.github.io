@@ -11,7 +11,7 @@ COUNTRIES = {
     "HR", "HU", "IE", "IT", "LT", "LU", "LV", "MT", "NL", "PL", "PT", "RO", "SE",
     "SI", "SK", "GB", "UK", "CH", "NO", "IS",
 }
-SUFFIX = re.compile(r"(?:(?<=[\s\-./\d])|^)(EEG|EG|EC|EU|CE|EK|WE|EF|EY|EZ)$")
+SUFFIX = re.compile(r"(?<=[\s\-./\d])(EEG|EWG|EG|EC|EU|CE|EK|WE|EF|EY|EZ|EB|ES|EÜ|KE)$")
 SEPARATORS = re.compile(r"[\s.\-/]+")
 BODY = re.compile(r"^([A-Z]*)0*(\d+)([A-Z]*)$")
 MSC = re.compile(r"^(?:MSC|ASC)-?C-?(\d+)(?:-(\d+))?$")
@@ -29,7 +29,7 @@ class ParsedCode:
 
 
 def _parse_msc(s: str) -> ParsedCode | None:
-    m = MSC.match(re.sub(r"\s+", "", s))
+    m = MSC.match(re.sub(r"[\s-]+", "-", s.strip()))
     if not m:
         return None
     base = f"MSC-C-{m.group(1)}"
@@ -47,9 +47,10 @@ def _parse_egg_shell(s: str) -> ParsedCode | None:
 
 def _parse_oval(s: str) -> ParsedCode | None:
     s = s.strip()
-    suffix = SUFFIX.search(s)
-    if suffix:
-        s = s[: suffix.start()]
+    suffix = False
+    while m := SUFFIX.search(s):  # codes can carry two suffixes, e.g. "EG/EC"
+        s = s[: m.start()].rstrip(" 	-./")
+        suffix = True
     compact = SEPARATORS.sub("", s)
     country, body = compact[:2], compact[2:]
     if country not in COUNTRIES or not body or not re.search(r"\d", body):
@@ -61,7 +62,7 @@ def _parse_oval(s: str) -> ParsedCode | None:
         region = m.group(1)
     ambiguous = (not suffix and country == "NL" and body.isdigit())
     return ParsedCode("oval", country, f"{country}-{norm}", f"{country} {body}", region,
-                      {"suffix": bool(suffix), "ambiguous": ambiguous, "number": int(body) if body.isdigit() else None})
+                      {"suffix": suffix, "ambiguous": ambiguous, "number": int(body) if body.isdigit() else None})
 
 
 def parse_code(raw: str) -> ParsedCode | None:

@@ -94,7 +94,8 @@ export function renderDossier(lang, parsed, matches, data) {
     if (record.group) {
       html += `<section class="step"><h3><span class="num">3</span> ${escapeHtml(t(lang, "step_group"))}</h3>`
         + `<p><strong>${escapeHtml(record.group.group)}</strong> ${badge(lang, record.group.evidence)} `
-        + `<span class="src">${link(record.group.source_url, hostOf(record.group.source_url))}</span></p></section>`;
+        + `<span class="src">${escapeHtml(t(lang, "source"))}: ${link(record.group.source_url, hostOf(record.group.source_url))}`
+        + `${record.group.date ? ` (${escapeHtml(t(lang, "as_of"))} ${escapeHtml(record.group.date)})` : ""}</span></p></section>`;
     }
     html += `<section class="step"><h3><span class="num">${record.group ? 4 : 3}</span> ${escapeHtml(t(lang, "step_products"))}</h3>`
       + productsSection(lang, record.products) + "</section>";

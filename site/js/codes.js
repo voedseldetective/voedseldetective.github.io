@@ -3,14 +3,14 @@
 const COUNTRIES = new Set(["AT", "BE", "BG", "CY", "CZ", "DE", "DK", "EE", "EL", "GR", "ES", "FI", "FR",
   "HR", "HU", "IE", "IT", "LT", "LU", "LV", "MT", "NL", "PL", "PT", "RO", "SE",
   "SI", "SK", "GB", "UK", "CH", "NO", "IS"]);
-const SUFFIX = /(?:(?<=[\s\-./\d])|^)(EEG|EG|EC|EU|CE|EK|WE|EF|EY|EZ)$/;
+const SUFFIX = /(?<=[\s\-./\d])(EEG|EWG|EG|EC|EU|CE|EK|WE|EF|EY|EZ|EB|ES|EÜ|KE)$/;
 const SEPARATORS = /[\s.\-/]+/g;
 const BODY = /^([A-Z]*)0*(\d+)([A-Z]*)$/;
 const MSC = /^(?:MSC|ASC)-?C-?(\d+)(?:-(\d+))?$/;
 const EGG_SHELL = /^([0-3])-?([A-Z]{2})-?(\d{5,})/;
 
 function parseMsc(s) {
-  const m = s.replace(/\s+/g, "").match(MSC);
+  const m = s.trim().replace(/[\s-]+/g, "-").match(MSC);
   if (!m) return null;
   const base = `MSC-C-${m[1]}`;
   const key = m[2] ? `${base}-${m[2]}` : base;
@@ -26,8 +26,11 @@ function parseEggShell(s) {
 
 function parseOval(s) {
   s = s.trim();
-  const suffix = s.match(SUFFIX);
-  if (suffix) s = s.slice(0, suffix.index);
+  let suffix = false;
+  for (let m = s.match(SUFFIX); m; m = s.match(SUFFIX)) { // codes can carry two suffixes, e.g. "EG/EC"
+    s = s.slice(0, m.index).replace(/[ 	\-./]+$/, "");
+    suffix = true;
+  }
   const compact = s.replace(SEPARATORS, "");
   const country = compact.slice(0, 2);
   const body = compact.slice(2);
@@ -37,7 +40,7 @@ function parseOval(s) {
   const region = country === "DE" && m && m[1].length === 2 ? m[1] : null;
   const isDigits = /^\d+$/.test(body);
   return { kind: "oval", country, key: `${country}-${norm}`, display: `${country} ${body}`, region,
-    extra: { suffix: Boolean(suffix), ambiguous: !suffix && country === "NL" && isDigits,
+    extra: { suffix, ambiguous: !suffix && country === "NL" && isDigits,
       number: isDigits ? parseInt(body, 10) : null } };
 }
 

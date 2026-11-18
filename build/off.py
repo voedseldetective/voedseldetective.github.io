@@ -103,6 +103,12 @@ def fetch_products(brands: list[str], fetch_json=search_json, sleep=time.sleep) 
     for raw in raw_codes:
         add(_all_pages(f'emb_codes:"{raw}"', fetch_json, sleep))
         sleep(1)
-    for p in found.values():
-        p.pop("_raw_codes", None)
-    return list(found.values())
+    return list(found.values())  # _raw_codes stays for the cache; merge() does not publish it
+
+
+def rekey(products: list[dict]) -> list[dict]:
+    """Recompute keys from cached raw codes so parser fixes apply in --offline builds."""
+    for p in products:
+        if p.get("_raw_codes"):
+            p["keys"] = _keys(p["_raw_codes"])
+    return [p for p in products if p["keys"]]

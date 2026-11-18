@@ -1,6 +1,7 @@
 // App shell: hash routing, language, search, share and cookieless analytics.
 import { parseCode } from "./codes.js";
 import { t, pickLang, LANGS } from "./i18n.js";
+import { parseHash as parseRouteHash } from "./route.js";
 import { lookup, renderDossier, renderNotFound, renderEggShell, renderHome, escapeHtml } from "./render.js";
 
 const CONTACT_EMAIL = "REPLACE_CONTACT_EMAIL";
@@ -19,11 +20,7 @@ function storeLang(l) {
   try { localStorage.setItem("lang", l); } catch { /* private mode */ }
 }
 
-function parseHash() {
-  const parts = location.hash.replace(/^#\/?/, "").split("/").filter(Boolean);
-  const l = LANGS.includes(parts[0]) ? parts[0] : null;
-  return { lang: l, page: parts[1] || "home", arg: parts[2] ? decodeURIComponent(parts.slice(2).join("/")) : null };
-}
+const parseHash = () => parseRouteHash(location.hash);
 
 function setChrome() {
   document.documentElement.lang = lang;

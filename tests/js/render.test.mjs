@@ -92,3 +92,13 @@ test("home lists cases in the chosen language", () => {
   assert.ok(html.includes("Cheese"));
   assert.ok(html.includes("#/en/kod/NL-Z507"));
 });
+
+test("group step shows its source date", () => {
+  const d = { codes: { "DE-NI10": { kind: "oval", country: "DE", region: "NI", products: [],
+    establishments: [est("DMK Deutsches Milchkontor GmbH", { city: "Zeven" })],
+    group: { group: "DMK Group", evidence: "company", source_url: "https://www.dmk.de/", date: "2026-11-17" } } } };
+  const { parsed, matches } = lookup(d, "DE NI 010 EG");
+  const html = renderDossier("en", parsed, matches, d);
+  assert.ok(html.includes("DMK Group"));
+  assert.ok(html.includes("2026-11-17"));
+});
