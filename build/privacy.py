@@ -7,10 +7,10 @@ import re
 
 _B, _E = r"(?<![\w.])", r"(?![\w])"
 # Case-insensitive legal-form tokens.
-_LEGAL_CI = ["B.V.", "N.V.", "Coöperatie", "Cooperatie", "U.A.", "Stichting", "GmbH",
+_LEGAL_CI = ["B.V.", "N.V.", "B.A.", "Coöperatie", "Cooperatie", "Coöperatieve", "Cooperatieve", "U.A.", "Stichting", "GmbH",
              "S.A.", "Ltd", "S.p.A.", "SpA", "A/S", "Holding"]
 # Short tokens matched case-sensitively, so a first name like "Ab" is not a legal form.
-_LEGAL_CS = ["BV", "NV", "AG", "SA", "AB", "KG"]
+_LEGAL_CS = ["BV", "NV", "BA", "AG", "SA", "AB", "KG"]
 _PERSONAL = ["V.O.F.", "Vof", "Mts.", "Maatschap", "eenmanszaak"]
 
 
@@ -18,7 +18,7 @@ def _alt(tokens):
     return "|".join(re.escape(t) for t in tokens)
 
 
-LEGAL_CI = re.compile(_B + "(?:" + _alt(_LEGAL_CI) + ")" + _E.replace(r"\w", r"\w"), re.I)
+LEGAL_CI = re.compile(_B + "(?:" + _alt(_LEGAL_CI) + ")" + _E, re.I)
 LEGAL_CS = re.compile(_B + "(?:" + _alt(_LEGAL_CS) + ")" + _E)
 PERSONAL = re.compile(_B + "(?:" + _alt(_PERSONAL) + ")" + _E, re.I)
 SURNAME_INITIAL = re.compile(r"^[^,]+, [A-Z]\.")

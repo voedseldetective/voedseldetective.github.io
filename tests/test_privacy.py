@@ -6,7 +6,9 @@ from build.privacy import is_legal_entity, public_establishment
 class PrivacyTests(unittest.TestCase):
     def test_legal_entities(self):
         for name in ["Th. Vergeer en Zonen B.V.", "FrieslandCampina Nederland B.V.",
-                     "DMK Deutsches Milchkontor GmbH"]:
+                     "DMK Deutsches Milchkontor GmbH",
+                     "Coöperatieve Zuivelonderneming CONO B.A.",
+                     "Zuivelcoöperatie DeltaMilk B.A."]:
             with self.subTest(name=name):
                 self.assertTrue(is_legal_entity(name))
 
