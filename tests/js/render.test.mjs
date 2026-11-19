@@ -134,15 +134,15 @@ test("orderProducts: NL chain, NL no chain, countries by count, unknown last", (
   assert.deepEqual(out.map((x) => x.name), ["nl-l", "nl-x", "fr1", "fr2", "de1", "u"]);
 });
 
-test("product list: summary, first 6 visible, rest in details", () => {
+test("product list: only NL products visible, other countries always behind details", () => {
   const nl = Array.from({ length: 4 }, (_, i) => prod(`N${i}`, "B", "Lidl"));
   const fr = Array.from({ length: 5 }, (_, i) => ({ ...prod(`F${i}`, "B", null), country: "france" }));
   const html = dossierFor([...nl, ...fr]);
   assert.ok(html.includes("4 in Nederland"));
   assert.ok(html.includes("5 elders"));
-  assert.ok(html.includes("Toon meer (3)"));
-  assert.ok(html.indexOf("F1") < html.indexOf("<details"));
-  assert.ok(html.indexOf("F2") > html.indexOf("<details"));
+  assert.ok(html.includes("Toon meer (5)"));
+  assert.ok(html.indexOf("N3") < html.indexOf("<details"));
+  assert.ok(html.indexOf("F0") > html.indexOf("<details"));
   assert.ok(html.includes('class="tag tag-nl">NL · Lidl<'));
   assert.ok(html.includes('class="tag">FR<'));
 });

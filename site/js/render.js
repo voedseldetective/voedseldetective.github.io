@@ -111,7 +111,7 @@ function productsSection(lang, products) {
   const parts = [nlCount ? `<strong>${escapeHtml(t(lang, "products_in_nl", { n: nlCount }))}</strong>`
     : escapeHtml(t(lang, "products_none_nl"))];
   if (elsewhere) parts.push(escapeHtml(t(lang, "products_elsewhere", { n: elsewhere })));
-  const visible = nlCount ? ordered.slice(0, SHOW_FIRST) : [];
+  const visible = ordered.slice(0, Math.min(SHOW_FIRST, nlCount)); // other countries only behind "show more"
   const hidden = ordered.slice(visible.length);
   const list = (xs) => `<ul class="products">${xs.map((p) => productItem(lang, p)).join("")}</ul>`;
   let html = `<p class="products-summary">${parts.join(" · ")}</p>`;
