@@ -9,6 +9,9 @@
   --company: #23519c;
   --community: #8a5a00;
   --verified: #4b2e83;
+  --stamp-dark: #3a2266;
+  --search-border: #d4c9ec;
+  --search-ring: #e6dff5;
   --tag-bg: #eceef3;
   --tag-nl-bg: #ffedd5;
   --tag-nl-ink: #9a3412;
@@ -36,24 +39,28 @@ a:focus-visible, button:focus-visible, input:focus-visible { outline: 3px solid 
 
 .tagline { font-size: clamp(1.5rem, 5vw, 2.1rem); font-weight: 750; line-height: 1.2; margin: 1.5rem 0 1.25rem; max-width: 30ch; }
 
-/* The search field is drawn as the oval approval mark found on the pack. */
+/* Search: a soft pill with an icon; the oval stamp look stays on the result code and examples. */
 .stamp {
-  display: flex; align-items: center; gap: 0.5rem;
-  border: 3px solid var(--stamp); border-radius: 50% / 50%;
-  padding: 0.9rem 0.9rem 0.9rem 2rem; background: var(--card);
-  max-width: 30rem;
+  display: flex; align-items: center; gap: 0.6rem;
+  border: 2px solid var(--search-border); border-radius: 999px;
+  padding: 0.4rem 0.4rem 0.4rem 1rem; background: var(--card);
+  box-shadow: 0 6px 20px rgba(75, 46, 131, 0.10);
+  max-width: 30rem; transition: border-color 0.15s, box-shadow 0.15s;
 }
+.stamp:focus-within { border-color: var(--stamp); box-shadow: 0 0 0 4px var(--search-ring), 0 6px 20px rgba(75, 46, 131, 0.10); }
+.search-icon { flex: none; color: var(--stamp); }
 .stamp input {
-  flex: 1; min-width: 0; border: 0; background: transparent; color: var(--stamp);
-  font: 700 1.35rem/1.2 system-ui, sans-serif; letter-spacing: 0.08em; text-transform: uppercase;
+  flex: 1; min-width: 0; border: 0; background: transparent; color: var(--ink); padding: 0.55rem 0;
+  font: 700 1.15rem/1.2 system-ui, sans-serif; letter-spacing: 0.06em; text-transform: uppercase;
 }
-.stamp input::placeholder { color: #a89cc4; letter-spacing: 0.04em; }
+.stamp input::placeholder { color: #8f88a8; font-weight: 500; letter-spacing: 0; text-transform: none; }
 .stamp input:focus-visible { outline: none; }
-.stamp:focus-within { box-shadow: 0 0 0 3px #d9cff0; }
 .stamp button {
-  border: 0; border-radius: 999px; background: var(--stamp); color: #fff;
-  font-weight: 700; font-size: 1rem; padding: 0.65rem 1.1rem; cursor: pointer;
+  flex: none; border: 0; border-radius: 999px; background: var(--stamp); color: #fff;
+  font-weight: 700; font-size: 1rem; padding: 0.75rem 1.25rem; cursor: pointer;
 }
+.stamp button:hover { background: var(--stamp-dark); }
+@media (prefers-reduced-motion: reduce) { .stamp { transition: none; } }
 
 #view { margin: 2rem 0 3rem; }
 .help, .note { color: var(--muted); }
@@ -104,9 +111,9 @@ a:focus-visible, button:focus-visible, input:focus-visible { outline: 3px solid 
 .foot { color: var(--muted); font-size: 0.9rem; padding-bottom: 2rem; display: flex; gap: 1rem; flex-wrap: wrap; }
 
 @media (max-width: 400px) {
-  .stamp { padding-left: 1.25rem; }
-  .stamp input { font-size: 1.1rem; }
-  .stamp button { padding: 0.6rem 0.8rem; }
+  .stamp { padding-left: 0.8rem; gap: 0.45rem; }
+  .stamp input { font-size: 1.05rem; }
+  .stamp button { padding: 0.7rem 0.95rem; }
 }
 
 .examples { margin-top: -0.5rem; margin-bottom: 1.5rem; }
