@@ -180,13 +180,34 @@ test("product country shows as ISO tag and unknown ones get no tag", () => {
   assert.equal(html.split('class="tag').length - 1, 1);
 });
 
-test("step numbers stay sequential without an establishment", () => {
+test("trail: nodes in order with dots hidden from screen readers", () => {
+  const d = { codes: { "DE-NI10": { kind: "oval", country: "DE", region: "NI",
+    establishments: [est("DMK", { city: "Zeven" })], group: { group: "DMK Group", evidence: "official", source_url: "https://gleif.org", date: "2026-11-18" },
+    products: [prod("Slagroom", "Milsani", "Aldi")] } } };
+  const { parsed, matches } = lookup(d, "DE NI 010 EG");
+  const html = renderDossier("nl", parsed, matches, d);
+  const order = ["node-clue", "node-facility", "node-group", "node-products"].map((c) => html.indexOf(c));
+  assert.deepEqual([...order].sort((a, b) => a - b), order);
+  assert.ok(order.every((i) => i > 0));
+  assert.ok(html.includes(STRINGS.nl.step_clue));
+  assert.ok(html.includes("Nedersaksen"));
+  assert.equal(html.split('class="dot" aria-hidden="true"').length - 1, 4);
+});
+
+test("trail omits facility and group nodes when data is missing", () => {
   const d = { codes: { "NL-Z999": { kind: "oval", country: "NL", region: null, group: null, establishments: [],
     products: [prod("A", "Milbona", "Lidl")] } } };
   const { parsed, matches } = lookup(d, "NL Z0999 EG");
   const html = renderDossier("nl", parsed, matches, d);
-  assert.ok(html.includes('<span class="num">2</span>'));
-  assert.ok(!html.includes('<span class="num">3</span>'));
+  assert.ok(!html.includes("node-facility") && !html.includes("node-group"));
+  assert.ok(html.includes("node-products"));
+  assert.ok(!html.includes('class="num"') && !html.includes('class="step"'));
+});
+
+test("not-found and egg-shell pages render a clue-only trail", () => {
+  const nf = renderNotFound("nl", parseCode("NL Z0999 EG"));
+  assert.equal(nf.split('class="node ').length - 1, 1);
+  assert.ok(nf.includes("node-clue"));
 });
 
 test("ambiguous dossiers label both codes the same way", () => {

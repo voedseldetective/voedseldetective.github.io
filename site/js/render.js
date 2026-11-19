@@ -42,22 +42,30 @@ function badge(lang, evidence) {
   return `<span class="badge badge-${escapeHtml(evidence)}">${escapeHtml(t(lang, `badge_${evidence}`))}</span>`;
 }
 
-function codeSection(lang, kind, country, region, display) {
-  const reg = regionName(country, region, lang);
-  return `<section class="step"><h3><span class="num">1</span> ${escapeHtml(t(lang, "step_code"))}</h3>
-<p class="code">${escapeHtml(display)}</p>
-<p>${escapeHtml(t(lang, KIND_LABEL[kind] || "kind_oval"))}</p>
-${country ? `<p>${escapeHtml(t(lang, "country"))}: ${escapeHtml(countryName(country, lang))}</p>` : ""}
-${reg ? `<p>${escapeHtml(t(lang, "region"))}: ${escapeHtml(reg)}</p>` : ""}</section>`;
+// One trail node: a colored dot (decorative), a small label and its body.
+function node(name, icon, label, body) {
+  return `<li class="node node-${name}"><span class="dot" aria-hidden="true">${icon}</span>`
+    + `<h3>${escapeHtml(label)}</h3>${body}</li>`;
+}
+
+function sourceLine(lang, evidence, url, date) {
+  const asOf = date ? ` (${escapeHtml(t(lang, "as_of"))} ${escapeHtml(date)})` : "";
+  return `<span class="src">${badge(lang, evidence)} ${escapeHtml(t(lang, "source"))}: ${link(url, hostOf(url))}${asOf}</span>`;
+}
+
+// The code as a stamp, then the trail; the clue node is always first.
+function codeSection(lang, kind, country, region, display, moreNodes = "") {
+  const clue = [t(lang, KIND_LABEL[kind] || "kind_oval"), country ? countryName(country, lang) : "", regionName(country, region, lang)]
+    .filter(Boolean).map(escapeHtml).join(" · ");
+  return `<p class="code">${escapeHtml(display)}</p><ol class="trail">`
+    + node("clue", "🔍", t(lang, "step_clue"), `<p>${clue}</p>`) + moreNodes + "</ol>";
 }
 
 function establishmentItem(lang, e) {
   const title = e.private ? `<em>${escapeHtml(t(lang, "private_facility"))}</em>`
     : `<strong>${escapeHtml(e.name)}</strong>${e.trade ? ` <span class="trade">(${escapeHtml(e.trade)})</span>` : ""}`;
   const type = TYPE_LABEL[e.type] ? ` · ${escapeHtml(t(lang, TYPE_LABEL[e.type]))}` : "";
-  const date = e.date ? ` (${escapeHtml(t(lang, "as_of"))} ${escapeHtml(e.date)})` : "";
-  return `<li>${title}<br>${escapeHtml(e.city || "")}${type}<br>${badge(lang, e.evidence)}
-<span class="src">${escapeHtml(t(lang, "source"))}: ${link(e.source_url, hostOf(e.source_url))}${date}</span></li>`;
+  return `<li>${title}<br>${escapeHtml(e.city || "")}${type}${sourceLine(lang, e.evidence, e.source_url, e.date)}</li>`;
 }
 
 function hostOf(url) {
@@ -126,22 +134,20 @@ export function renderDossier(lang, parsed, matches, data) {
     const display = matches.length > 1 || record.kind === "egg_pack"
       ? key.replace(/^EGGPACK-/, "").replace(/^([A-Z]{2})-?/, "$1 ")
       : parsed?.display || key;
-    let step = 1;
-    html += `<article class="dossier" data-key="${escapeHtml(key)}">`;
-    html += codeSection(lang, record.kind, record.country, record.region, display);
+    let nodes = "";
     if (record.establishments.length) {
-      html += `<section class="step"><h3><span class="num">${++step}</span> ${escapeHtml(t(lang, "step_facility"))}</h3><ul class="est">`
-        + record.establishments.map((e) => establishmentItem(lang, e)).join("") + "</ul></section>";
+      nodes += node("facility", "🏭", t(lang, "step_facility"),
+        `<ul class="est">${record.establishments.map((e) => establishmentItem(lang, e)).join("")}</ul>`);
     }
     if (record.group) {
-      html += `<section class="step"><h3><span class="num">${++step}</span> ${escapeHtml(t(lang, "step_group"))}</h3>`
-        + `<p><strong>${escapeHtml(record.group.group)}</strong> ${badge(lang, record.group.evidence)} `
-        + `<span class="src">${escapeHtml(t(lang, "source"))}: ${link(record.group.source_url, hostOf(record.group.source_url))}`
-        + `${record.group.date ? ` (${escapeHtml(t(lang, "as_of"))} ${escapeHtml(record.group.date)})` : ""}</span></p></section>`;
+      const g = record.group;
+      nodes += node("group", "🏢", t(lang, "step_group"),
+        `<p><strong>${escapeHtml(g.group)}</strong>${sourceLine(lang, g.evidence, g.source_url, g.date)}</p>`);
     }
-    html += `<section class="step"><h3><span class="num">${++step}</span> ${escapeHtml(t(lang, "step_products"))}</h3>`
-      + productsSection(lang, record.products) + "</section>";
-    html += disclaimer(lang, record.kind) + "</article>";
+    nodes += node("products", "🛒", t(lang, "step_products"), productsSection(lang, record.products));
+    html += `<article class="dossier" data-key="${escapeHtml(key)}">`
+      + codeSection(lang, record.kind, record.country, record.region, display, nodes)
+      + disclaimer(lang, record.kind) + "</article>";
   }
   html += `<p>${link(OFF_URL, t(lang, "off_add"))}</p>`;
   return html;

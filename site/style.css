@@ -12,6 +12,11 @@
   --tag-bg: #eceef3;
   --tag-nl-bg: #ffedd5;
   --tag-nl-ink: #9a3412;
+  --dot-clue: #ede9fe;
+  --dot-facility: #fef3c7;
+  --dot-group: #dcfce7;
+  --dot-products: #dbeafe;
+  --trail-line: #c4b5fd;
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   color: var(--ink);
   background: var(--paper);
@@ -53,20 +58,32 @@ a:focus-visible, button:focus-visible, input:focus-visible { outline: 3px solid 
 #view { margin: 2rem 0 3rem; }
 .help, .note { color: var(--muted); }
 .dossier { background: var(--card); border: 1px solid var(--line); border-radius: 0.75rem; padding: 1.25rem; margin-bottom: 1.25rem; }
-.step { padding-left: 2.25rem; position: relative; margin-bottom: 1.25rem; }
-.step h3 { font-size: 1rem; margin: 0 0 0.35rem; color: var(--muted); font-weight: 650; }
-.step .num {
-  position: absolute; left: 0; top: -0.1rem; width: 1.6rem; height: 1.6rem; border-radius: 50%;
-  border: 2px solid var(--stamp); color: var(--stamp); display: grid; place-items: center;
-  font-size: 0.85rem; font-weight: 800;
+/* The detective trail: colored dots joined by a dashed line. */
+.trail { list-style: none; padding: 0; margin: 0.75rem 0 0; }
+.node { position: relative; padding: 0 0 1.1rem 3rem; min-height: 2.25rem; }
+.node:not(:last-child)::before {
+  content: ""; position: absolute; left: 1.05rem; top: 2.4rem; bottom: 0.15rem; width: 3px;
+  background: repeating-linear-gradient(var(--trail-line) 0 6px, transparent 6px 11px);
 }
-.step p { margin: 0.15rem 0; }
-.code { font-weight: 800; font-size: 1.3rem; color: var(--stamp); letter-spacing: 0.06em; }
+.dot {
+  position: absolute; left: 0; top: 0; width: 2.25rem; height: 2.25rem; border-radius: 50%;
+  display: grid; place-items: center; font-size: 1.1rem; line-height: 1;
+}
+.node-clue .dot { background: var(--dot-clue); }
+.node-facility .dot { background: var(--dot-facility); }
+.node-group .dot { background: var(--dot-group); }
+.node-products .dot { background: var(--dot-products); }
+.node h3 { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; margin: 0.1rem 0 0.2rem; color: var(--muted); font-weight: 700; }
+.node p { margin: 0.15rem 0; }
+.code {
+  display: inline-block; font-weight: 800; font-size: 1.3rem; color: var(--stamp); letter-spacing: 0.06em;
+  border: 3px solid var(--stamp); border-radius: 50% / 50%; padding: 0.35rem 1.1rem; margin: 0; background: var(--card);
+}
 .est, .products { list-style: none; padding: 0; margin: 0; }
 .est li, .products li { padding: 0.5rem 0; border-top: 1px solid var(--line); overflow-wrap: anywhere; }
 .est li:first-child, .products li:first-child { border-top: 0; }
 .products li { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 0.35rem 0.5rem; }
-.pname { flex: 1 1 12rem; min-width: 0; }
+.pname { flex: 1 1 0; min-width: 0; }
 .tag { flex: none; font-size: 0.78rem; font-weight: 700; padding: 0.1rem 0.55rem; border-radius: 999px; background: var(--tag-bg); color: var(--muted); white-space: nowrap; }
 .tag-nl { background: var(--tag-nl-bg); color: var(--tag-nl-ink); }
 .products-summary { margin: 0.15rem 0 0.35rem; }
@@ -104,4 +121,4 @@ details { margin-top: 0.25rem; }
 summary { cursor: pointer; color: var(--stamp); font-weight: 650; padding: 0.4rem 0; }
 .badges { list-style: none; padding: 0; }
 .badges li { padding: 0.3rem 0; }
-.step > .src { margin-bottom: 0.25rem; }
+.node .src { margin-top: 0.15rem; }
