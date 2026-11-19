@@ -2,11 +2,11 @@
 // Every value that comes from data is escaped.
 import { parseCode, candidateKeys } from "./codes.js";
 import { t } from "./i18n.js";
-import { countryName, regionName, offCountryName } from "./regions.js";
+import { countryName, regionName, offCountryCode } from "./regions.js";
 
 const OFF_URL = "https://world.openfoodfacts.org/";
 const EXAMPLES = ["NL Z0507 EG", "DE NI 010 EG", "MSC-C-50572"];
-const SHOW_FIRST = 5;
+const SHOW_FIRST = 6;
 // Register names are proper names and stay in Dutch.
 const SOURCE_NAMES = {
   cokz_zuivel: "COKZ – erkende zuivelbedrijven",
@@ -64,34 +64,54 @@ function hostOf(url) {
   try { return new URL(url).hostname.replace(/^www\./, ""); } catch { return String(url || ""); }
 }
 
+// NL products first (store brands before others), then other countries by size, unknown last.
+export function orderProducts(products) {
+  const nlChain = [], nlOther = [], unknown = [], byCountry = new Map();
+  for (const p of products) {
+    const code = offCountryCode(p.country);
+    if (code === "NL") (p.chain ? nlChain : nlOther).push(p);
+    else if (!code) unknown.push(p);
+    else {
+      if (!byCountry.has(code)) byCountry.set(code, []);
+      byCountry.get(code).push(p);
+    }
+  }
+  const others = [...byCountry.entries()]
+    .sort(([a, xs], [b, ys]) => ys.length - xs.length || a.localeCompare(b))
+    .flatMap(([, xs]) => xs);
+  return [...nlChain, ...nlOther, ...others, ...unknown];
+}
+
+function productTag(p) {
+  const code = offCountryCode(p.country);
+  if (!code) return "";
+  const text = p.chain ? `${code} · ${p.chain}` : code;
+  return `<span class="tag${code === "NL" ? " tag-nl" : ""}">${escapeHtml(text)}</span>`;
+}
+
 function productItem(lang, p) {
-  const country = offCountryName(p.country, lang);
-  return `<li>${link(p.source_url, p.name || p.barcode)} — <strong>${escapeHtml(p.brand || "")}</strong>`
-    + `${country ? ` <span class="muted">(${escapeHtml(country)})</span>` : ""}`
-    + `${p.evidence !== "community" ? ` ${badge(lang, p.evidence)}` : ""}</li>`;
+  const brand = p.brand ? `<strong>${escapeHtml(p.brand)}</strong> ` : "";
+  return `<li><span class="pname">${brand}${link(p.source_url, p.name || p.barcode)}</span>${productTag(p)}`
+    + `${p.evidence !== "community" ? badge(lang, p.evidence) : ""}</li>`;
 }
 
 function productsSection(lang, products) {
   if (!products.length) return `<p class="muted">${escapeHtml(t(lang, "no_products"))}</p>`;
-  const groups = new Map();
-  for (const p of products) {
-    const g = p.chain || "";
-    if (!groups.has(g)) groups.set(g, []);
-    groups.get(g).push(p);
+  const ordered = orderProducts(products);
+  const nlCount = ordered.filter((p) => offCountryCode(p.country) === "NL").length;
+  const elsewhere = ordered.length - nlCount;
+  const parts = [nlCount ? `<strong>${escapeHtml(t(lang, "products_in_nl", { n: nlCount }))}</strong>`
+    : escapeHtml(t(lang, "products_none_nl"))];
+  if (elsewhere) parts.push(escapeHtml(t(lang, "products_elsewhere", { n: elsewhere })));
+  const visible = nlCount ? ordered.slice(0, SHOW_FIRST) : [];
+  const hidden = ordered.slice(visible.length);
+  const list = (xs) => `<ul class="products">${xs.map((p) => productItem(lang, p)).join("")}</ul>`;
+  let html = `<p class="products-summary">${parts.join(" · ")}</p>`;
+  if (visible.length) html += list(visible);
+  if (hidden.length) {
+    html += `<details><summary>${escapeHtml(t(lang, "show_more", { n: hidden.length }))}</summary>${list(hidden)}</details>`;
   }
-  let html = `<p class="src">${escapeHtml(t(lang, "products_source"))} ${badge(lang, "community")}</p>`;
-  for (const [chain, items] of groups) {
-    const list = (xs) => `<ul class="products">${xs.map((p) => productItem(lang, p)).join("")}</ul>`;
-    html += `<h4>${escapeHtml(chain || t(lang, "other_brands"))}</h4>`;
-    if (chain || items.length <= SHOW_FIRST + 1) {
-      html += list(items); // store brands always stay open
-    } else {
-      html += list(items.slice(0, SHOW_FIRST))
-        + `<details><summary>${escapeHtml(t(lang, "show_all", { n: items.length }))}</summary>`
-        + list(items.slice(SHOW_FIRST)) + "</details>";
-    }
-  }
-  return html;
+  return html + `<p class="src">${escapeHtml(t(lang, "products_source"))} ${badge(lang, "community")}</p>`;
 }
 
 function disclaimer(lang, kind) {

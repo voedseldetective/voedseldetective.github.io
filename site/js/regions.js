@@ -47,8 +47,12 @@ const OFF_SLUGS = {
   malta: "MT", romania: "RO", slovenia: "SI", slovakia: "SK", iceland: "IS", "united-states": "US",
 };
 
+export function offCountryCode(slug) {
+  return OFF_SLUGS[slug] ?? null;
+}
+
 export function offCountryName(slug, lang) {
-  const code = OFF_SLUGS[slug];
+  const code = offCountryCode(slug);
   return code ? countryName(code, lang) : null;
 }
 

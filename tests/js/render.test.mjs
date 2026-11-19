@@ -1,6 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { lookup, renderDossier, renderNotFound, renderEggShell, renderHome, escapeHtml } from "../../site/js/render.js";
+import { lookup, renderDossier, renderNotFound, renderEggShell, renderHome, escapeHtml, orderProducts } from "../../site/js/render.js";
+import { offCountryCode } from "../../site/js/regions.js";
 import { parseCode } from "../../site/js/codes.js";
 import { STRINGS } from "../../site/js/i18n.js";
 
@@ -113,15 +114,55 @@ test("home offers clickable example codes", () => {
   assert.ok(html.includes("MSC-C-50572"));
 });
 
-test("long other-brands list collapses after 5, chains stay open", () => {
-  const d = { codes: { "NL-Z507": { ...data.codes["NL-Z507"], products: [prod("L", "Milbona", "Lidl"), ...many(12)] } } };
+// ---- NL-first flat product list ----
+const dossierFor = (products, lang = "nl") => {
+  const d = { codes: { "NL-Z507": { ...data.codes["NL-Z507"], products } } };
   const { parsed, matches } = lookup(d, "NL Z0507 EG");
-  const html = renderDossier("tr", parsed, matches, d);
-  assert.ok(html.includes("<details"));
-  assert.ok(html.includes("Tümünü göster (12)"));
-  assert.ok(html.indexOf("P4") < html.indexOf("<details"));
-  assert.ok(html.indexOf("P5") > html.indexOf("<details"));
-  assert.ok(html.indexOf("Milbona") < html.indexOf("<details"));
+  return renderDossier(lang, parsed, matches, d);
+};
+
+test("offCountryCode maps slugs to ISO", () => {
+  assert.equal(offCountryCode("netherlands"), "NL");
+  assert.equal(offCountryCode("afghanistan"), null);
+  assert.equal(offCountryCode(null), null);
+});
+
+test("orderProducts: NL chain, NL no chain, countries by count, unknown last", () => {
+  const p = (n, chain, country) => ({ ...prod(n, "B", chain), country });
+  const out = orderProducts([p("u", null, "mars"), p("fr1", null, "france"), p("de1", "Lidl", "germany"),
+    p("nl-x", null, "netherlands"), p("fr2", "Lidl", "france"), p("nl-l", "Lidl", "netherlands")]);
+  assert.deepEqual(out.map((x) => x.name), ["nl-l", "nl-x", "fr1", "fr2", "de1", "u"]);
+});
+
+test("product list: summary, first 6 visible, rest in details", () => {
+  const nl = Array.from({ length: 4 }, (_, i) => prod(`N${i}`, "B", "Lidl"));
+  const fr = Array.from({ length: 5 }, (_, i) => ({ ...prod(`F${i}`, "B", null), country: "france" }));
+  const html = dossierFor([...nl, ...fr]);
+  assert.ok(html.includes("4 in Nederland"));
+  assert.ok(html.includes("5 elders"));
+  assert.ok(html.includes("Toon meer (3)"));
+  assert.ok(html.indexOf("F1") < html.indexOf("<details"));
+  assert.ok(html.indexOf("F2") > html.indexOf("<details"));
+  assert.ok(html.includes('class="tag tag-nl">NL · Lidl<'));
+  assert.ok(html.includes('class="tag">FR<'));
+});
+
+test("exactly 6 products: no details; 7: one hidden", () => {
+  const six = Array.from({ length: 6 }, (_, i) => prod(`P${i}`, "B", "AH"));
+  assert.ok(!dossierFor(six).includes("<details"));
+  assert.ok(dossierFor([...six, prod("P6", "B", "AH")]).includes("Toon meer (1)"));
+});
+
+test("no NL products: none-in-NL summary, unknown counts as elsewhere, all behind details", () => {
+  const html = dossierFor([{ ...prod("X", "B", null), country: "france" }, { ...prod("Y", "B", null), country: "mars" }]);
+  assert.ok(html.includes(STRINGS.nl.products_none_nl));
+  assert.ok(html.includes("2 elders"));
+  assert.ok(html.indexOf("<details") > 0 && html.indexOf("<details") < html.indexOf(">X<"));
+});
+
+test("chain and brand are escaped in tag and row", () => {
+  const html = dossierFor([prod("n", "<b>x</b>", "<i>c</i>")]);
+  assert.ok(!html.includes("<i>c</i>") && !html.includes("<b>x</b>"));
 });
 
 test("community badge shown once per product section", () => {
@@ -131,14 +172,12 @@ test("community badge shown once per product section", () => {
   assert.ok(html.includes("Open Food Facts"));
 });
 
-test("product country is translated and unknown ones hidden", () => {
-  const d = { codes: { "NL-Z507": { ...data.codes["NL-Z507"],
-    products: [{ ...prod("A", "Milbona", "Lidl"), country: "germany" }, { ...prod("B", "X", null), country: "afghanistan" }] } } };
-  const { parsed, matches } = lookup(d, "NL Z0507 EG");
-  const html = renderDossier("tr", parsed, matches, d);
-  assert.ok(html.includes("(Almanya)"));
+test("product country shows as ISO tag and unknown ones get no tag", () => {
+  const html = dossierFor([{ ...prod("A", "Milbona", "Lidl"), country: "germany" }, { ...prod("B", "X", null), country: "afghanistan" }], "tr");
+  assert.ok(html.includes('class="tag">DE · Lidl<'));
   assert.ok(!html.includes("germany"));
   assert.ok(!html.includes("afghanistan"));
+  assert.equal(html.split('class="tag').length - 1, 1);
 });
 
 test("step numbers stay sequential without an establishment", () => {
