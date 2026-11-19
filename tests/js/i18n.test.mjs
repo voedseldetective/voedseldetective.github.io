@@ -65,3 +65,8 @@ test("design pass strings and countries", () => {
   }
   for (const c of ["BG", "CY", "EE", "HR", "LV", "MT", "RO", "SI", "SK", "IS", "SE", "FI", "CZ"]) assert.ok(COUNTRIES[c]?.tr, c);
 });
+
+test("official badge description names every official source", () => {
+  for (const lang of ["nl", "en", "tr"])
+    for (const s of ["COKZ", "NVWA", "MSC", "GLEIF"]) assert.ok(STRINGS[lang].badge_official_desc.includes(s), `${lang} ${s}`);
+});
